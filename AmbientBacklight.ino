@@ -16,6 +16,8 @@
 #define MSG_SETBACKGROUND 36
 #define MSG_SETCOLORDATA 10
 #define MSG_OK 29
+#define MSG_WRONG_MSG 54
+#define MSG_WRONG_LENDATA 55
 #define MSG_FAIL 90
 
 LedControl control(5);
@@ -23,10 +25,10 @@ BrightnessControl brightnessWhite(0, NUM_POT_READINGS);
 BrightnessControl brightnessRGB(1, NUM_POT_READINGS);
 MessageHandler handler(MSG_BEGIN);
 
-void MsgHandshake(uint16_t len, uint8_t* data);
-void MsgSetLED(uint16_t len, uint8_t* data);
-void MsgSetBackground(uint16_t len, uint8_t* data);
-void MsgSetColorData(uint16_t len, uint8_t* data);
+void MsgHandshake(uint8_t len, uint8_t* data);
+void MsgSetLED(uint8_t len, uint8_t* data);
+void MsgSetBackground(uint8_t len, uint8_t* data);
+void MsgSetColorData(uint8_t len, uint8_t* data);
 
 void setup()
 {
@@ -64,69 +66,69 @@ void setup()
 			delay(1);
 		}
 	}*/
-	int16_t r, g, b;
-	r = 0xFF;
-	g = 0x00;
-	b = 0x00;
-	int8_t delta = 2;
+	//int16_t r, g, b;
+	//r = 0xFF;
+	//g = 0x00;
+	//b = 0x00;
+	//int8_t delta = 2;
 
-	for(; g <= 0xFF; g += delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	g = 0xFF;
+	//for(; g <= 0xFF; g += delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//g = 0xFF;
 
-	for(; r >= 0x00; r -= delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	r = 0x00;
+	//for(; r >= 0x00; r -= delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//r = 0x00;
 
-	for(; b <= 0xFF; b += delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	b = 0xFF;
+	//for(; b <= 0xFF; b += delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//b = 0xFF;
 
-	for(; g >= 0x00; g -= delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	g = 0x00;
+	//for(; g >= 0x00; g -= delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//g = 0x00;
 
-	for(; r <= 0xFF; r += delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	r = 0xFF;
+	//for(; r <= 0xFF; r += delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//r = 0xFF;
 
-	for(; b >= 0x00; b -= delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	b = 0x00;
+	//for(; b >= 0x00; b -= delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//b = 0x00;
 
-	for(; r >= 0x00; r -= delta)
-	{
-		control.SetRGBBackground(Color(r, g, b));
-		control.Update();
-		delay(1);
-	}
-	r = 0x00;
+	//for(; r >= 0x00; r -= delta)
+	//{
+	//	control.SetRGBBackground(Color(r, g, b));
+	//	control.Update();
+	//	delay(1);
+	//}
+	//r = 0x00;
 
-	control.SetRGBBackground(Color::Yellow);
+	control.SetRGBBackground(Color::Cyan);
 }
 
 void loop()
@@ -138,7 +140,9 @@ void loop()
 
 	if(handler.Update())
 	{
-		uint16_t len = handler.GetMessageDataLength();
+		control.SetRGBBackground(Color::Cyan);
+
+		uint8_t len = handler.GetMessageDataLength();
 
 		uint8_t msg;
 		uint8_t* data = NULL;
@@ -163,7 +167,7 @@ void loop()
 			MsgSetColorData(len, data);
 			break;
 		default:
-			handler.SendMessage(MSG_FAIL, 0, NULL);
+			handler.SendMessage(MSG_WRONG_MSG, 0, NULL);
 			break;
 		}
 
@@ -177,7 +181,7 @@ void loop()
 	delayMicroseconds(100);
 }
 
-void MsgHandshake(uint16_t len, uint8_t* data)
+void MsgHandshake(uint8_t len, uint8_t* data)
 {
 	if(len == 2 && data)
 	{
@@ -186,11 +190,11 @@ void MsgHandshake(uint16_t len, uint8_t* data)
 	}
 	else
 	{
-		handler.SendMessage(MSG_FAIL, 0, NULL);
+		handler.SendMessage(MSG_WRONG_LENDATA, 0, NULL);
 	}
 }
 
-void MsgSetLED(uint16_t len, uint8_t* data)
+void MsgSetLED(uint8_t len, uint8_t* data)
 {
 	if(len == 4 && data)
 	{
@@ -200,11 +204,11 @@ void MsgSetLED(uint16_t len, uint8_t* data)
 	}
 	else
 	{
-		handler.SendMessage(MSG_FAIL, 0, NULL);
+		handler.SendMessage(MSG_WRONG_LENDATA, 0, NULL);
 	}
 }
 
-void MsgSetBackground(uint16_t len, uint8_t* data)
+void MsgSetBackground(uint8_t len, uint8_t* data)
 {
 	if(len == 3 && data)
 	{
@@ -214,11 +218,11 @@ void MsgSetBackground(uint16_t len, uint8_t* data)
 	}
 	else
 	{
-		handler.SendMessage(MSG_FAIL, 0, NULL);
+		handler.SendMessage(MSG_WRONG_LENDATA, 0, NULL);
 	}
 }
 
-void MsgSetColorData(uint16_t len, uint8_t* data)
+void MsgSetColorData(uint8_t len, uint8_t* data)
 {
 	if(data)
 	{
@@ -232,6 +236,6 @@ void MsgSetColorData(uint16_t len, uint8_t* data)
 	}
 	else
 	{
-		handler.SendMessage(MSG_FAIL, 0, NULL);
+		handler.SendMessage(MSG_WRONG_LENDATA, 0, NULL);
 	}
 }

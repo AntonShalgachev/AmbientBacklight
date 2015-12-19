@@ -15,16 +15,12 @@ bool MessageHandler::Update()
 	{
 		if(_msg == 0) // Waiting for the message
 		{
-			if(Serial.available() >= 4)
+			if(Serial.available() >= 3)
 			{
 				if(Serial.read() == _msgBegin)
 				{
 					_msg = Serial.read();
-
-					uint8_t high = Serial.read();
-					uint8_t low = Serial.read();
-					//_len = high << 8 | low;
-					_len = word(high, low);
+					_len = Serial.read();
 
 					if(_data)
 					{
@@ -56,7 +52,7 @@ bool MessageHandler::Update()
 	return (_handled == false);
 }
 
-uint16_t MessageHandler::GetMessageDataLength() const
+uint8_t MessageHandler::GetMessageDataLength() const
 {
 	return _len;
 }
@@ -77,9 +73,9 @@ void MessageHandler::GetMessage(uint8_t* msg, uint8_t* data)
 	_handled = true;
 }
 
-void MessageHandler::SendMessage(uint8_t msg, uint16_t len, uint8_t* data)
+void MessageHandler::SendMessage(uint8_t msg, uint8_t len, uint8_t* data)
 {
-	uint8_t query[] = {_msgBegin, msg, highByte(len), lowByte(len)};
+	uint8_t query[] = {_msgBegin, msg, len};
 	Serial.write(query, sizeof(query) / sizeof(uint8_t));
 
 	if(len > 0 && data)
